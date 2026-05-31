@@ -3,32 +3,14 @@ from flask_cors import CORS
 import pickle
 import numpy as np
 
-# =========================
-# INITIALIZE APP
-# =========================
-
 app = Flask(__name__)
-
-# Enable CORS
 CORS(app)
 
-# =========================
-# LOAD TRAINED MODEL
-# =========================
-
 model = pickle.load(open('mental_health_model.pkl', 'rb'))
-
-# =========================
-# HOME ROUTE
-# =========================
 
 @app.route('/')
 def home():
     return "Mental Health Prediction API Running"
-
-# =========================
-# PREDICTION ROUTE
-# =========================
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -37,42 +19,65 @@ def predict():
 
         data = request.get_json()
 
-        # =========================
-        # GET DATA FROM FRONTEND
-        # =========================
-
         gender = int(data['gender'])
-        age = int(data['age'])
-        study_year = int(data['study_year'])
-        cgpa = int(data['cgpa'])
-        anxiety = int(data['anxiety'])
-        panic_attack = int(data['panic_attack'])
+        age = float(data['age'])
 
-        # =========================
-        # MATCH TRAINING FEATURES
-        # =========================
+        academic_pressure = float(
+            data['academic_pressure']
+        )
+
+        cgpa = float(data['cgpa'])
+
+        study_satisfaction = float(
+            data['study_satisfaction']
+        )
+
+        sleep_duration = int(
+            data['sleep_duration']
+        )
+
+        dietary_habits = int(
+            data['dietary_habits']
+        )
+
+        suicidal_thoughts = int(
+            data['suicidal_thoughts']
+        )
+
+        work_study_hours = float(
+            data['work_study_hours']
+        )
+
+        financial_stress = float(
+            data['financial_stress']
+        )
+
+        family_history = int(
+            data['family_history']
+        )
 
         features = np.array([[
+
             gender,
             age,
-            study_year,
+            academic_pressure,
             cgpa,
-            0,  # marital_status
-            anxiety,
-            panic_attack,
-            0   # treatment
-        ]])
+            study_satisfaction,
+            sleep_duration,
+            dietary_habits,
+            suicidal_thoughts,
+            work_study_hours,
+            financial_stress,
+            family_history
 
-        # =========================
-        # MODEL PREDICTION
-        # =========================
+        ]])
 
         prediction = model.predict(features)
 
         result = (
-            "High Mental Health Risk"
+            "High Depression Risk"
             if prediction[0] == 1
-            else "Low Mental Health Risk"
+            else "Low Depression Risk"
         )
 
         return jsonify({
@@ -87,9 +92,5 @@ def predict():
             "error": str(e)
         })
 
-# =========================
-# RUN SERVER
-# =========================
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
